@@ -1,0 +1,23 @@
+[33mcommit 6bd59a5d27021e4c1450c5ee88ac4dc96d8b8301[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: ranguDpro <rangu230801@gmail.com>
+Date:   Mon Aug 29 13:02:33 2022 +0530
+
+    used passport and session to implement cookies and sessions and authentication
+
+[33mcommit 6f6feb62a7d3c8a9f8171a19b79e4099c849263b[m
+Author: ranguDpro <rangu230801@gmail.com>
+Date:   Fri Aug 26 16:03:22 2022 +0530
+
+    used bcryptjs to make the hashing even stronger
+
+[33mcommit 133ffb5cc37923498ebc5506ebefd85c42d5658c[m
+Author: ranguDpro <rangu230801@gmail.com>
+Date:   Fri Aug 26 15:48:01 2022 +0530
+
+    used md5 for hashing
+
+[33mcommit 4d548e0cfceb5b4f224e62b555db66c76b9afac5[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: ranguDpro <rangu230801@gmail.com>
+Date:   Fri Aug 26 14:19:56 2022 +0530
+
+    added .env file for safer encryption

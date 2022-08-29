@@ -31,7 +31,8 @@ mongoose.connect("mongodb://127.0.0.1:27017/userDB");
 
 const userSchema = new mongoose.Schema({
   email: String,
-  password: String
+  password: String,
+  secret: String
 });
 
 userSchema.plugin(passport_local_mongoose); //adding this plugin to hash and salt our passwords
@@ -61,7 +62,12 @@ app.get("/register", function(req, res) {
 app.get("/secrets", function(req, res){
   //checking the cookie
   if(req.isAuthenticated()){
-    res.render("secrets", {});
+    User.find({secret: {$ne: null}}, function(err, foundUsers){
+      if(err) console.log(err);
+      else{
+        res.render("secrets", {users_with_secrets: foundUsers});
+      }
+    });
   }else{
     res.redirect("/");
   }
@@ -72,7 +78,28 @@ app.get("/logout", function(req, res){
   //using passport functionality to destroy the cookie
   req.logout(function(err){
     if(err) console.log(err);
-    else res.redirect("/"); 
+    else res.redirect("/");
+  });
+});
+
+app.get("/submit", function(req, res){
+  if(req.isAuthenticated()){
+    res.render("submit", {});
+  }else{
+    res.redirect("/");
+  }
+});
+
+app.post("/submit", function(req, res){
+  const secret = req.body.secret;
+  User.findById(req.user.id, function(err, foundUser){
+    if(err) console.log(err);
+    else{
+      foundUser.secret = secret;
+      foundUser.save(function(err){
+        res.redirect("/secrets");
+      });
+    }
   });
 });
 
