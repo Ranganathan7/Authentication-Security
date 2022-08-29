@@ -6,11 +6,13 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const passport = require("passport");
 const passport_local_mongoose = require("passport-local-mongoose");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const findOrCreate = require("mongoose-findorcreate"); //to use findOrCreate in setting up google strategy
 
 const port = 3000;
 const app = express();
 
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 app.use(body_parser.urlencoded({
   extended: true
 }));
@@ -32,16 +34,56 @@ mongoose.connect("mongodb://127.0.0.1:27017/userDB");
 const userSchema = new mongoose.Schema({
   email: String,
   password: String,
+  googleId: String,
   secret: String
 });
 
 userSchema.plugin(passport_local_mongoose); //adding this plugin to hash and salt our passwords
+userSchema.plugin(findOrCreate);
 
 const User = mongoose.model("user", userSchema);
 
 passport.use(User.createStrategy());  //creates a cookie with our User information in it
-passport.serializeUser(User.serializeUser()); //stuffs the cookie
-passport.deserializeUser(User.deserializeUser()); //breaks the cookie
+// passport.serializeUser(User.serializeUser()); //stuffs the cookie
+// passport.deserializeUser(User.deserializeUser()); //breaks the cookie
+passport.serializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, {
+      id: user.id,
+      username: user.username,
+      picture: user.picture
+    });
+  });
+});
+
+passport.deserializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, user);
+  });
+});
+
+passport.use(new GoogleStrategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: "http://localhost:3000/auth/google/secrets"
+  },
+  function(accessToken, refreshToken, profile, cb) {
+    //using mongoose-findorcreate package
+    User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      return cb(err, user);
+    });
+  }
+));
+
+app.get("/auth/google",
+  passport.authenticate("google", { scope: ["profile"] }));
+
+app.get("/auth/google/secrets",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  function(req, res) {
+    // Successful authentication, redirect to secrets page
+    res.redirect("/secrets");
+});
 
 app.get("/", function(req, res) {
   res.render("home", {});
